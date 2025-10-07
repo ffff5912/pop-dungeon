@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- タイトル（重要） -->
+  <title>ポップダンジョン | 無料で遊べるダンジョン探索ゲーム</title>
+
+  <!-- 説明文（重要） -->
+  <meta name="description" content="タップで進む楽しいダンジョン探索ゲーム！モンスターを倒してレベルアップ。子供から大人まで楽しめる無料ブラウザゲーム。">
+
+  <!-- キーワード -->
+  <meta name="keywords" content="ダンジョン,ゲーム,無料,RPG,ブラウザゲーム">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏰 ポップダンジョン</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #ff6b9d;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(255, 107, 157, 0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff6b9d;
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);
+            font-weight: bold;
+        }
+
+        .dungeon-info {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border: 2px solid #ff6b9d;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .dungeon-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 10px;
+        }
+
+        .stat-value {
+            color: #ff6b9d;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .floor-progress {
+            background: #ffd8e4;
+            border: 2px solid #ff6b9d;
+            border-radius: 10px;
+            height: 22px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .floor-progress-fill {
+            background: linear-gradient(90deg, #ff6b9d 0%, #feca57 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 107, 157, 0.5);
+        }
+
+        .floor-progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+        }
+
+        .dungeon-display {
+            width: 100%;
+            margin-bottom: 15px;
+            border: 3px solid #ff6b9d;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
+            position: relative;
+        }
+
+        .minimap-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #ff6b9d;
+            border-radius: 10px;
+            padding: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #minimap {
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        #dungeonCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            image-rendering: pixelated;
+        }
+
+        .player-info {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border: 2px solid #48c6ef;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .player-level {
+            font-size: 16px;
+            font-weight: bold;
+            color: #48c6ef;
+            margin-bottom: 8px;
+        }
+
+        .exp-bar-container {
+            background: #d4f1f4;
+            border-radius: 10px;
+            height: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exp-bar {
+            background: linear-gradient(90deg, #48c6ef 0%, #6f86d6 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .exp-bar-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stats {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border: 2px solid #ff6f91;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .exp-display {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .per-second {
+            font-size: 13px;
+            color: #555;
+        }
+
+        .move-button {
+            background: linear-gradient(135deg, #ff6b9d 0%, #feca57 100%);
+            border: none;
+            border-radius: 15px;
+            width: 100%;
+            height: 80px;
+            font-size: 26px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+            transition: all 0.2s;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .move-button:hover {
+            background: linear-gradient(135deg, #ff8fab 0%, #fed766 100%);
+            transform: scale(1.02);
+        }
+
+        .move-button:active {
+            transform: scale(0.98);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tab-button {
+            background: #ffd8e4;
+            border: 2px solid #ff6b9d;
+            color: #ff6b9d;
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #ff6b9d 0%, #feca57 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .item-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border: 2px solid #ff6b9d;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff6b9d;
+        }
+
+        .item-description {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .item-count {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-end;
+        }
+
+        .item-cost {
+            font-size: 12px;
+            font-weight: bold;
+            color: #ff6f91;
+        }
+
+        .buy-button, .use-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .buy-button:hover, .use-button:hover {
+            transform: scale(1.05);
+        }
+
+        .buy-button:disabled, .use-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .use-button {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        /* トースト通知 */
+        #toastContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            font-weight: bold;
+            max-width: 280px;
+            animation: slideIn 0.3s ease-out;
+            pointer-events: auto;
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .toast.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .toast.info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .toast.exp {
+            background: linear-gradient(135deg, #ffd89b 0%, #feca57 100%);
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* レベルアップ演出（短縮版） */
+        .levelup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 215, 0, 0.2);
+            z-index: 4000;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .levelup-overlay.active {
+            display: flex;
+        }
+
+        .levelup-text {
+            font-size: 50px;
+            font-weight: bold;
+            color: #feca57;
+            text-shadow: 0 0 20px rgba(254, 202, 87, 1);
+        }
+
+        /* ボス戦CSS */
+        .boss-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.5s;
+        }
+
+        .boss-container {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border: 5px solid #ff6b9d;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 50px rgba(255, 107, 157, 0.8);
+        }
+
+        .boss-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .boss-header h2 {
+            font-size: 32px;
+            color: #ff6b9d;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            margin: 0;
+        }
+
+        .boss-sprite {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .boss-emoji {
+            font-size: 120px;
+            animation: bossPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 107, 157, 0.8));
+        }
+
+        @keyframes bossPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes bossShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes damageFloat {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-80px);
+                opacity: 0;
+            }
+        }
+
+        .boss-hp-container {
+            margin: 20px 0;
+        }
+
+        .boss-hp-label {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .boss-hp-bar {
+            width: 100%;
+            height: 30px;
+            background: #f8bbd0;
+            border: 3px solid #ff6b9d;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .boss-hp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f87171 0%, #fb923c 100%);
+            transition: width 0.3s ease;
+            width: 100%;
+        }
+
+        .boss-actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .boss-attack-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b9d 0%, #feca57 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.5);
+        }
+
+        .boss-attack-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.7);
+        }
+
+        .boss-attack-btn:active {
+            transform: scale(0.95);
+        }
+
+        .boss-damage-text {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .boss-damage-text span {
+            color: #ff6b9d;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        /* 浮遊テキスト（短縮版） */
+        .floating-text {
+            position: fixed;
+            font-size: 20px;
+            font-weight: bold;
+            color: #feca57;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            animation: float-up 0.5s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes float-up {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-60px); }
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏰 ポップダンジョン 🏰</h1>
+
+        <div class="dungeon-info">
+            <div class="dungeon-stats">
+                <div class="dungeon-stat">
+                    <div class="stat-label">総歩数</div>
+                    <div class="stat-value" id="stepsDisplay">0歩</div>
+                </div>
+                <div class="dungeon-stat">
+                    <div class="stat-label">深さ</div>
+                    <div class="stat-value" id="depthDisplay">0m</div>
+                </div>
+                <div class="dungeon-stat">
+                    <div class="stat-label">現在地</div>
+                    <div class="stat-value" id="floorDisplay">地下1階</div>
+                </div>
+            </div>
+            <div class="floor-progress">
+                <div class="floor-progress-fill" id="floorProgress" style="width: 0%"></div>
+                <div class="floor-progress-text" id="floorProgressText">次の階まで100歩</div>
+            </div>
+        </div>
+
+        <div class="dungeon-display">
+            <canvas id="dungeonCanvas" width="600" height="360"></canvas>
+            <div class="minimap-container">
+                <canvas id="minimap" width="150" height="150"></canvas>
+            </div>
+        </div>
+
+        <div class="player-info">
+            <div class="player-level" id="playerLevel">Lv.1 見習い冒険者</div>
+            <div class="exp-bar-container">
+                <div class="exp-bar" id="expBar" style="width: 0%"></div>
+                <div class="exp-bar-text" id="expBarText">0 / 100</div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="exp-display" id="expDisplay">EXP: 0</div>
+            <div class="per-second" id="perSecondDisplay">自動EXP: 0/秒</div>
+        </div>
+
+        <button class="move-button" id="moveButton">⬆️ 前へ進む！ ⬆️</button>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('upgrades')">仲間</button>
+            <button class="tab-button" onclick="switchTab('items')">アイテム</button>
+        </div>
+
+        <div id="tab-upgrades" class="tab-content active">
+            <div id="upgradeList"></div>
+        </div>
+
+        <div id="tab-items" class="tab-content">
+            <div id="itemList"></div>
+        </div>
+    </div>
+
+    <!-- トーストコンテナ -->
+    <div id="toastContainer"></div>
+
+    <!-- レベルアップ演出 -->
+    <div class="levelup-overlay" id="levelupOverlay">
+        <div class="levelup-text">LEVEL UP!</div>
+    </div>
+
+    <!-- ボス戦オーバーレイ -->
+    <div id="bossOverlay" class="boss-overlay" style="display:none;">
+        <div class="boss-container">
+            <div class="boss-header">
+                <h2 id="bossName">ボス名</h2>
+            </div>
+
+            <div class="boss-sprite">
+                <div id="bossEmoji" class="boss-emoji">🐉</div>
+            </div>
+
+            <div class="boss-hp-container">
+                <div class="boss-hp-label">
+                    <span id="bossHPText">5000 / 5000</span>
+                </div>
+                <div class="boss-hp-bar">
+                    <div id="bossHPFill" class="boss-hp-fill"></div>
+                </div>
+            </div>
+
+            <div class="boss-actions">
+                <button id="bossAttackBtn" class="boss-attack-btn">
+                    ⚔️ 攻撃！ ⚔️
+                </button>
+                <div class="boss-damage-text" id="bossDamageText">
+                    ダメージ: <span id="playerDamage">10</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('dungeonCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const TILE_SIZE = 30;
+        const GRID_WIDTH = 20;
+        const GRID_HEIGHT = 12;
+        const CANVAS_WIDTH = TILE_SIZE * GRID_WIDTH;
+        const CANVAS_HEIGHT = TILE_SIZE * GRID_HEIGHT;
+
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+
+        const minimapCanvas = document.getElementById('minimap');
+        const minimapCtx = minimapCanvas.getContext('2d');
+        const MINIMAP_SIZE = 150;
+
+        let playerMapX = 10;
+        let playerMapY = 180;
+        const PLAYER_SCREEN_X = 10;
+        const PLAYER_SCREEN_Y = 9;
+
+        const dungeonMap = [];
+        let exp = 0;
+        let expPerClick = 1;
+        let expPerSecond = 0;
+        let steps = 0;
+        let depth = 0;
+        let currentFloor = 1;
+        let playerLevel = 1;
+        let playerExp = 0;
+        let expToNextLevel = 100;
+        let playerItems = {};
+
+        // ボス戦の状態
+        let currentBoss = null;
+        let bossHP = 0;
+        let bossMaxHP = 0;
+
+        // 統計データ
+        let stats = {
+            totalSteps: 0,
+            deepestFloor: 1,
+            monstersDefeated: 0,
+            bossesDefeated: 0,
+            treasuresFound: 0,
+            playTimeMinutes: 0,
+            startTime: Date.now()
+        };
+
+        const bossTypes = [
+            {
+                id: 'slime_king',
+                name: 'スライムキング',
+                emoji: '👑',
+                color: '#4ade80',
+                hp: 500,
+                expReward: 1000,
+                floor: 1
+            },
+            {
+                id: 'goblin_lord',
+                name: 'ゴブリンロード',
+                emoji: '👺',
+                color: '#f87171',
+                hp: 1500,
+                expReward: 3000,
+                floor: 2
+            },
+            {
+                id: 'dragon',
+                name: 'ファイアドラゴン',
+                emoji: '🐉',
+                color: '#fb923c',
+                hp: 5000,
+                expReward: 10000,
+                floor: 3
+            },
+            {
+                id: 'demon_king',
+                name: '魔王',
+                emoji: '😈',
+                color: '#a855f7',
+                hp: 15000,
+                expReward: 30000,
+                floor: 4
+            }
+        ];
+
+        const titles = {
+            1: "見習い冒険者",
+            5: "駆け出し勇者",
+            10: "熟練の戦士",
+            20: "英雄"
+        };
+
+        // トースト通知
+        function showToast(message, type = 'info', duration = 2000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // 浮遊数字
+        function showFloatingNumber(amount, x, y) {
+            const text = document.createElement('div');
+            text.className = 'floating-text';
+            text.textContent = '+' + amount;
+            text.style.left = x + 'px';
+            text.style.top = y + 'px';
+            document.body.appendChild(text);
+
+            setTimeout(() => text.remove(), 500);
+        }
+
+        // マップ初期化
+        let mapGeneratedUpTo = 0;
+        const MAP_GENERATION_BUFFER = 50;
+
+        function initDungeonMap() {
+            // 初期生成：0から200まで
+            generateMapSection(200, 0);
+            mapGeneratedUpTo = 0;
+        }
+
+        function generateMapSection(startY, endY) {
+            for (let y = startY; y >= endY; y--) {
+                if (!dungeonMap[y]) {
+                    dungeonMap[y] = [];
+                }
+
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    if (!dungeonMap[y][x]) {
+                        dungeonMap[y][x] = { type: 'wall', monster: null, item: null, visited: false };
+                    }
+                }
+
+                // 通路作成（中央に幅5マスの通路）
+                for (let x = 8; x <= 12; x++) {
+                    dungeonMap[y][x].type = 'floor';
+                }
+
+                // 10マスごとに部屋
+                if (y % 10 === 0) {
+                    for (let x = 5; x <= 15; x++) {
+                        dungeonMap[y][x].type = 'floor';
+                        for (let dy = 1; dy <= 3; dy++) {
+                            if (dungeonMap[y + dy]) {
+                                dungeonMap[y + dy][x].type = 'floor';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function ensureMapExists(y) {
+            const minY = y - MAP_GENERATION_BUFFER;
+
+            if (minY < mapGeneratedUpTo) {
+                const newEnd = mapGeneratedUpTo - 100;
+                generateMapSection(mapGeneratedUpTo - 1, newEnd);
+                mapGeneratedUpTo = newEnd;
+            }
+        }
+
+        function getCameraOffset() {
+            return { x: playerMapX - PLAYER_SCREEN_X, y: playerMapY - PLAYER_SCREEN_Y };
+        }
+
+        function drawDefaultWall(gridX, gridY) {
+            const pixelX = gridX * TILE_SIZE;
+            const pixelY = gridY * TILE_SIZE;
+            ctx.fillStyle = '#ffb3ba';
+            ctx.fillRect(pixelX, pixelY, TILE_SIZE, TILE_SIZE);
+        }
+
+        function drawTile(screenX, screenY, tile) {
+            if (!tile) {
+                drawDefaultWall(screenX, screenY);
+                return;
+            }
+
+            const pixelX = screenX * TILE_SIZE;
+            const pixelY = screenY * TILE_SIZE;
+
+            if (tile.type === 'wall') {
+                ctx.fillStyle = '#ffb3ba';
+                ctx.fillRect(pixelX, pixelY, TILE_SIZE, TILE_SIZE);
+                ctx.strokeStyle = '#ff9aa2';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(pixelX, pixelY, TILE_SIZE, TILE_SIZE);
+            } else if (tile.type === 'floor') {
+                ctx.fillStyle = '#ffffba';
+                ctx.fillRect(pixelX, pixelY, TILE_SIZE, TILE_SIZE);
+
+                if ((screenX + screenY) % 2 === 0) {
+                    ctx.fillStyle = '#fff9c4';
+                    ctx.fillRect(pixelX + 2, pixelY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                }
+
+                if (tile.visited) {
+                    ctx.fillStyle = 'rgba(255, 235, 205, 0.4)';
+                    ctx.fillRect(pixelX, pixelY, TILE_SIZE, TILE_SIZE);
+                }
+            }
+
+            if (tile.monster) {
+                ctx.font = `${TILE_SIZE - 6}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(tile.monster.emoji, pixelX + TILE_SIZE / 2, pixelY + TILE_SIZE / 2);
+            }
+
+            if (tile.item) {
+                ctx.font = `${TILE_SIZE - 8}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(tile.item.emoji, pixelX + TILE_SIZE / 2, pixelY + TILE_SIZE / 2);
+            }
+        }
+
+        function drawPlayer() {
+            const pixelX = PLAYER_SCREEN_X * TILE_SIZE + TILE_SIZE / 2;
+            const pixelY = PLAYER_SCREEN_Y * TILE_SIZE + TILE_SIZE / 2;
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.beginPath();
+            ctx.ellipse(pixelX, pixelY + TILE_SIZE / 3, TILE_SIZE / 3, TILE_SIZE / 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.font = `${TILE_SIZE - 4}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🚶', pixelX, pixelY);
+        }
+
+        function drawMinimap() {
+            minimapCtx.clearRect(0, 0, MINIMAP_SIZE, MINIMAP_SIZE);
+
+            // 背景
+            minimapCtx.fillStyle = '#fce4ec';
+            minimapCtx.fillRect(0, 0, MINIMAP_SIZE, MINIMAP_SIZE);
+
+            // 表示範囲（プレイヤー中心に45マス分）
+            const range = 45;
+            const startY = playerMapY - range / 2;
+            const endY = playerMapY + range / 2;
+            const startX = playerMapX - range / 2;
+            const endX = playerMapX + range / 2;
+
+            // マップ描画
+            for (let y = startY; y < endY; y++) {
+                for (let x = startX; x < endX; x++) {
+                    if (dungeonMap[y] && dungeonMap[y][x]) {
+                        const tile = dungeonMap[y][x];
+                        const miniX = ((x - startX) / range) * MINIMAP_SIZE;
+                        const miniY = ((y - startY) / range) * MINIMAP_SIZE;
+                        const size = MINIMAP_SIZE / range;
+
+                        if (tile.type === 'wall') {
+                            minimapCtx.fillStyle = '#8b7d9e';
+                        } else if (tile.type === 'floor') {
+                            minimapCtx.fillStyle = tile.visited ? '#f8bbd0' : '#fff';
+                        }
+
+                        minimapCtx.fillRect(miniX, miniY, size, size);
+
+                        // モンスター
+                        if (tile.monster) {
+                            minimapCtx.fillStyle = '#f87171';
+                            minimapCtx.fillRect(miniX, miniY, size, size);
+                        }
+
+                        // アイテム
+                        if (tile.item) {
+                            minimapCtx.fillStyle = '#feca57';
+                            minimapCtx.fillRect(miniX, miniY, size, size);
+                        }
+                    }
+                }
+            }
+
+            // プレイヤー位置（中央）
+            minimapCtx.fillStyle = '#48c6ef';
+            minimapCtx.fillRect(
+                MINIMAP_SIZE / 2 - 3,
+                MINIMAP_SIZE / 2 - 3,
+                6,
+                6
+            );
+        }
+
+        function drawDungeon() {
+            // 明るい背景
+            const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+            gradient.addColorStop(0, '#a8edea');
+            gradient.addColorStop(1, '#fed6e3');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            const camera = getCameraOffset();
+
+            // プレイヤー位置のマップを確保
+            ensureMapExists(playerMapY);
+
+            for (let screenY = 0; screenY < GRID_HEIGHT; screenY++) {
+                for (let screenX = 0; screenX < GRID_WIDTH; screenX++) {
+                    const mapX = screenX + camera.x;
+                    const mapY = screenY + camera.y;
+
+                    if (dungeonMap[mapY] && dungeonMap[mapY][mapX]) {
+                        drawTile(screenX, screenY, dungeonMap[mapY][mapX]);
+                    } else {
+                        drawDefaultWall(screenX, screenY);
+                    }
+                }
+            }
+
+            drawPlayer();
+            drawMinimap();
+            requestAnimationFrame(drawDungeon);
+        }
+
+        function spawnMonster(y, x, type) {
+            if (dungeonMap[y] && dungeonMap[y][x] && dungeonMap[y][x].type === 'floor') {
+                const monsters = {
+                    'slime': { emoji: '🟢', exp: 50 },
+                    'goblin': { emoji: '👹', exp: 100 },
+                    'dragon': { emoji: '🐉', exp: 1000 }
+                };
+                dungeonMap[y][x].monster = monsters[type] || monsters['slime'];
+            }
+        }
+
+        function spawnItem(y, x, type) {
+            if (dungeonMap[y] && dungeonMap[y][x] && dungeonMap[y][x].type === 'floor') {
+                const items = {
+                    'treasure': { emoji: '💎', effect: 'exp', value: 100 },
+                    'coin': { emoji: '🪙', effect: 'exp', value: 50 }
+                };
+                dungeonMap[y][x].item = items[type] || items['coin'];
+            }
+        }
+
+        function populateDungeon() {
+            for (let i = 0; i < 30; i++) {
+                const y = playerMapY - 20 - i * 5;
+                const x = 8 + Math.floor(Math.random() * 5);
+                spawnMonster(y, x, ['slime', 'goblin'][Math.floor(Math.random() * 2)]);
+            }
+
+            for (let i = 0; i < 20; i++) {
+                const y = playerMapY - 15 - i * 8;
+                const x = 8 + Math.floor(Math.random() * 5);
+                spawnItem(y, x, ['treasure', 'coin'][Math.floor(Math.random() * 2)]);
+            }
+        }
+
+        function moveForward() {
+            const nextY = playerMapY - 1;
+            const nextX = playerMapX;
+
+            // マップ生成確認
+            ensureMapExists(nextY);
+
+            if (dungeonMap[nextY] && dungeonMap[nextY][nextX]) {
+                const nextTile = dungeonMap[nextY][nextX];
+
+                if (nextTile.type === 'floor') {
+                    playerMapY = nextY;
+                    steps++;
+                    exp += expPerClick;
+                    playerExp += expPerClick;
+
+                    nextTile.visited = true;
+                    checkTileEvents(nextX, nextY);
+                    checkStepEvents();
+                    checkLevelUp();
+                    updateDisplay();
+                    updateDungeonInfo();
+                    saveGame();
+                }
+            }
+        }
+
+        function checkTileEvents(x, y) {
+            const tile = dungeonMap[y][x];
+
+            if (tile.monster) {
+                exp += tile.monster.exp;
+                playerExp += tile.monster.exp;
+                stats.monstersDefeated++;
+                showToast(`${tile.monster.emoji} 撃破！ +${tile.monster.exp} EXP`, 'exp', 1500);
+                showFloatingNumber(tile.monster.exp, window.innerWidth / 2, window.innerHeight / 2);
+                tile.monster = null;
+            }
+
+            if (tile.item) {
+                exp += tile.item.value;
+                playerExp += tile.item.value;
+                stats.treasuresFound++;
+                showToast(`${tile.item.emoji} 発見！ +${tile.item.value} EXP`, 'success', 1500);
+                showFloatingNumber(tile.item.value, window.innerWidth / 2, window.innerHeight / 2);
+                tile.item = null;
+            }
+        }
+
+        function checkStepEvents() {
+            stats.totalSteps = steps;
+            stats.deepestFloor = Math.max(stats.deepestFloor, currentFloor);
+
+            if (steps % 10 === 0 && steps > 0) {
+                const y = playerMapY - 15;
+                spawnMonster(y, 10, 'goblin');
+            }
+
+            if (steps % 5 === 0 && steps > 0) {
+                const y = playerMapY - 10 - Math.floor(Math.random() * 5);
+                const x = 8 + Math.floor(Math.random() * 5);
+                spawnItem(y, x, 'coin');
+            }
+
+            // ボス出現（50歩ごと）
+            if (steps % 50 === 0 && steps > 0) {
+                checkBossSpawn();
+            }
+
+            // 階層突破（100歩ごと）
+            if (steps % 100 === 0 && steps > 0) {
+                onFloorChange();
+            }
+        }
+
+        // ボス出現チェック
+        function checkBossSpawn() {
+            const floorLevel = Math.floor(steps / 100) + 1;
+            spawnBoss(floorLevel);
+        }
+
+        // ボス生成
+        function spawnBoss(floorLevel) {
+            const bossIndex = Math.min(floorLevel - 1, bossTypes.length - 1);
+            const bossTemplate = bossTypes[bossIndex];
+
+            currentBoss = {
+                ...bossTemplate,
+                hp: bossTemplate.hp * floorLevel,
+                maxHp: bossTemplate.hp * floorLevel
+            };
+
+            bossHP = currentBoss.hp;
+            bossMaxHP = currentBoss.maxHp;
+
+            showBossUI();
+        }
+
+        // ボス戦UI表示
+        function showBossUI() {
+            const overlay = document.getElementById('bossOverlay');
+            const bossName = document.getElementById('bossName');
+            const bossEmoji = document.getElementById('bossEmoji');
+            const bossHPText = document.getElementById('bossHPText');
+            const bossHPFill = document.getElementById('bossHPFill');
+            const playerDamage = document.getElementById('playerDamage');
+
+            bossName.textContent = currentBoss.name;
+            bossEmoji.textContent = currentBoss.emoji;
+            bossHPText.textContent = `${bossHP} / ${bossMaxHP}`;
+            bossHPFill.style.width = '100%';
+
+            const damage = expPerClick * 10;
+            playerDamage.textContent = damage;
+
+            overlay.style.display = 'flex';
+
+            const attackBtn = document.getElementById('bossAttackBtn');
+            attackBtn.onclick = () => attackBoss();
+        }
+
+        // ボスを攻撃
+        function attackBoss() {
+            const damage = expPerClick * 10;
+            bossHP -= damage;
+
+            const bossHPText = document.getElementById('bossHPText');
+            const bossHPFill = document.getElementById('bossHPFill');
+
+            bossHP = Math.max(0, bossHP);
+            bossHPText.textContent = `${bossHP} / ${bossMaxHP}`;
+            bossHPFill.style.width = `${(bossHP / bossMaxHP) * 100}%`;
+
+            showDamageEffect(damage);
+
+            if (bossHP <= 0) {
+                defeatBoss();
+            }
+        }
+
+        // ダメージエフェクト
+        function showDamageEffect(damage) {
+            const bossEmoji = document.getElementById('bossEmoji');
+
+            const damageText = document.createElement('div');
+            damageText.textContent = `-${damage}`;
+            damageText.style.position = 'absolute';
+            damageText.style.fontSize = '40px';
+            damageText.style.fontWeight = 'bold';
+            damageText.style.color = '#f87171';
+            damageText.style.textShadow = '2px 2px 4px rgba(0,0,0,0.5)';
+            damageText.style.animation = 'damageFloat 1s ease-out forwards';
+
+            bossEmoji.parentElement.style.position = 'relative';
+            bossEmoji.parentElement.appendChild(damageText);
+
+            setTimeout(() => {
+                damageText.remove();
+            }, 1000);
+
+            bossEmoji.style.animation = 'none';
+            setTimeout(() => {
+                bossEmoji.style.animation = 'bossShake 0.3s, bossPulse 2s ease-in-out infinite';
+            }, 10);
+        }
+
+        // ボス撃破
+        function defeatBoss() {
+            const overlay = document.getElementById('bossOverlay');
+
+            exp += currentBoss.expReward;
+            playerExp += currentBoss.expReward;
+            stats.bossesDefeated++;
+
+            showToast(`🎉 ${currentBoss.name}を撃破！ +${currentBoss.expReward} EXP`, 'success', 4000);
+            flashScreen('#ffd700', 0.7, 500);
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                currentBoss = null;
+            }, 1000);
+
+            updateDisplay();
+            checkLevelUp();
+            saveGame();
+        }
+
+        // 階層突破演出
+        function onFloorChange() {
+            currentFloor++;
+
+            showFloorClearAnimation();
+
+            const bonus = 5000 * currentFloor;
+            exp += bonus;
+            playerExp += bonus;
+
+            expPerClick += 2;
+
+            showToast(`🎊 地下${currentFloor}階到達！ +${bonus} EXP`, 'success', 5000);
+
+            updateDisplay();
+            checkLevelUp();
+            saveGame();
+        }
+
+        // 階層突破アニメーション
+        function showFloorClearAnimation() {
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.background = 'rgba(0, 0, 0, 0.8)';
+            overlay.style.display = 'flex';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.zIndex = '9999';
+            overlay.style.animation = 'fadeIn 0.5s';
+
+            const text = document.createElement('div');
+            text.textContent = `地下${currentFloor}階`;
+            text.style.fontSize = '80px';
+            text.style.fontWeight = 'bold';
+            text.style.color = '#feca57';
+            text.style.textShadow = '0 0 30px #feca57';
+            text.style.animation = 'scaleIn 1s ease-out';
+
+            overlay.appendChild(text);
+            document.body.appendChild(overlay);
+
+            setTimeout(() => {
+                overlay.style.animation = 'fadeOut 0.5s';
+                setTimeout(() => {
+                    overlay.remove();
+                }, 500);
+            }, 2000);
+
+            flashScreen('#feca57', 0.8, 500);
+        }
+
+        // 画面フラッシュ
+        function flashScreen(color, opacity, duration) {
+            const flash = document.createElement('div');
+            flash.style.position = 'fixed';
+            flash.style.top = '0';
+            flash.style.left = '0';
+            flash.style.width = '100%';
+            flash.style.height = '100%';
+            flash.style.backgroundColor = color;
+            flash.style.opacity = opacity;
+            flash.style.pointerEvents = 'none';
+            flash.style.zIndex = '9999';
+            flash.style.transition = `opacity ${duration}ms`;
+
+            document.body.appendChild(flash);
+
+            setTimeout(() => {
+                flash.style.opacity = '0';
+                setTimeout(() => {
+                    flash.remove();
+                }, duration);
+            }, 50);
+        }
+
+        document.getElementById('moveButton').addEventListener('click', moveForward);
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        function checkLevelUp() {
+            while (playerExp >= expToNextLevel) {
+                playerExp -= expToNextLevel;
+                playerLevel++;
+                expPerClick += 2;
+                expToNextLevel = Math.floor(100 * Math.pow(1.5, playerLevel - 1));
+                showLevelUp();
+            }
+            updatePlayerInfo();
+        }
+
+        function showLevelUp() {
+            const overlay = document.getElementById('levelupOverlay');
+            overlay.classList.add('active');
+            showToast(`🎉 レベルアップ！ Lv.${playerLevel}`, 'success', 2000);
+            setTimeout(() => overlay.classList.remove('active'), 800);
+        }
+
+        function updatePlayerInfo() {
+            const title = Object.keys(titles).reverse().find(level => playerLevel >= level);
+            document.getElementById('playerLevel').textContent = `Lv.${playerLevel} ${titles[title]}`;
+            const expPercent = (playerExp / expToNextLevel) * 100;
+            document.getElementById('expBar').style.width = expPercent + '%';
+            document.getElementById('expBarText').textContent = `${formatNumber(playerExp)} / ${formatNumber(expToNextLevel)}`;
+        }
+
+        function updateDungeonInfo() {
+            depth = steps * 10;
+            currentFloor = Math.floor(steps / 100) + 1;
+
+            document.getElementById('stepsDisplay').textContent = formatNumber(steps) + '歩';
+            document.getElementById('depthDisplay').textContent = formatNumber(depth) + 'm';
+            document.getElementById('floorDisplay').textContent = `地下${currentFloor}階`;
+
+            const stepsInFloor = steps % 100;
+            const progress = (stepsInFloor / 100) * 100;
+            document.getElementById('floorProgress').style.width = progress + '%';
+            document.getElementById('floorProgressText').textContent = `次の階まで${100 - stepsInFloor}歩`;
+        }
+
+        const upgrades = [
+            { id: 'weapon', name: '⚔️ 武器強化', description: 'タップEXP+1', baseCost: 50, costMultiplier: 1.5, count: 0, effect: 'click', power: 1 },
+            { id: 'slime', name: '🟢 スライム', description: '自動EXP+1/秒', baseCost: 100, costMultiplier: 1.5, count: 0, effect: 'auto', power: 1 },
+            { id: 'goblin', name: '👹 ゴブリン', description: '自動EXP+5/秒', baseCost: 500, costMultiplier: 1.5, count: 0, effect: 'auto', power: 5 },
+            { id: 'dragon', name: '🐉 ドラゴン', description: '自動EXP+20/秒', baseCost: 2000, costMultiplier: 1.5, count: 0, effect: 'auto', power: 20 }
+        ];
+
+        const items = [
+            { id: "healPotion", name: "🧪 回復ポーション", description: "即座に500 EXP", cost: 300, effect: () => { exp += 500; playerExp += 500; checkLevelUp(); updateDisplay(); showToast('✅ +500 EXP！', 'exp', 1500); } },
+            { id: "expBoost", name: "🌟 経験値ブースト", description: "即座に1000 EXP", cost: 800, effect: () => { exp += 1000; playerExp += 1000; checkLevelUp(); updateDisplay(); showToast('✅ +1000 EXP！', 'exp', 1500); } }
+        ];
+
+        function buyUpgrade(upgradeId) {
+            const upgrade = upgrades.find(u => u.id === upgradeId);
+            if (!upgrade) return;
+            const cost = Math.ceil(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
+            if (exp >= cost) {
+                exp -= cost;
+                upgrade.count++;
+                if (upgrade.effect === 'click') expPerClick += upgrade.power;
+                else if (upgrade.effect === 'auto') expPerSecond += upgrade.power;
+                showToast(`✅ ${upgrade.name} 購入！`, 'success', 1500);
+                updateDisplay();
+                saveGame();
+            } else {
+                showToast('💰 EXPが足りません', 'warning', 1500);
+            }
+        }
+
+        function buyItem(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+            if (exp >= item.cost) {
+                exp -= item.cost;
+                playerItems[itemId] = (playerItems[itemId] || 0) + 1;
+                showToast(`✅ ${item.name} 購入！`, 'success', 1500);
+                updateDisplay();
+                saveGame();
+            } else {
+                showToast('💰 EXPが足りません', 'warning', 1500);
+            }
+        }
+
+        function useItem(itemId) {
+            if (!playerItems[itemId] || playerItems[itemId] <= 0) return;
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+            playerItems[itemId]--;
+            item.effect();
+            updateDisplay();
+            saveGame();
+        }
+
+        function updateDisplay() {
+            document.getElementById('expDisplay').textContent = 'EXP: ' + formatNumber(Math.floor(exp));
+            document.getElementById('perSecondDisplay').textContent = '自動EXP: ' + formatNumber(expPerSecond) + '/秒';
+
+            const upgradeList = document.getElementById('upgradeList');
+            upgradeList.innerHTML = '';
+            upgrades.forEach(upgrade => {
+                const cost = Math.ceil(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
+                const canBuy = exp >= cost;
+                const div = document.createElement('div');
+                div.className = 'item-card';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${upgrade.name}</div>
+                        <div class="item-description">${upgrade.description}</div>
+                        <div class="item-count">所持: ${upgrade.count}個</div>
+                    </div>
+                    <div class="item-actions">
+                        <div class="item-cost">${formatNumber(cost)} EXP</div>
+                        <button class="buy-button" ${canBuy ? '' : 'disabled'}>購入</button>
+                    </div>
+                `;
+                div.querySelector('.buy-button').addEventListener('click', () => buyUpgrade(upgrade.id));
+                upgradeList.appendChild(div);
+            });
+
+            const itemList = document.getElementById('itemList');
+            itemList.innerHTML = '';
+            items.forEach(item => {
+                const canBuy = exp >= item.cost;
+                const owned = playerItems[item.id] || 0;
+                const div = document.createElement('div');
+                div.className = 'item-card';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-description">${item.description}</div>
+                        <div class="item-count">所持: ${owned}個</div>
+                    </div>
+                    <div class="item-actions">
+                        <div class="item-cost">${formatNumber(item.cost)} EXP</div>
+                        <button class="buy-button" ${canBuy ? '' : 'disabled'}>購入</button>
+                        <button class="use-button" ${owned > 0 ? '' : 'disabled'}>使う</button>
+                    </div>
+                `;
+                const btns = div.querySelectorAll('button');
+                btns[0].addEventListener('click', () => buyItem(item.id));
+                btns[1].addEventListener('click', () => useItem(item.id));
+                itemList.appendChild(div);
+            });
+
+            updatePlayerInfo();
+        }
+
+        function formatNumber(num) {
+            if (num >= 10000) {
+                const man = Math.floor(num / 10000);
+                const remainder = num % 10000;
+                return remainder === 0 ? man + '万' : man + '万' + remainder.toLocaleString();
+            }
+            return num.toLocaleString();
+        }
+
+        function autoGenerate() {
+            if (expPerSecond > 0) {
+                exp += expPerSecond;
+                playerExp += expPerSecond;
+                checkLevelUp();
+                updateDisplay();
+                saveGame();
+            }
+        }
+
+        function saveGame() {
+            const data = {
+                exp, expPerClick, expPerSecond, steps, depth, currentFloor,
+                playerLevel, playerExp, expToNextLevel, playerMapX, playerMapY,
+                upgrades: upgrades.map(u => ({ id: u.id, count: u.count })),
+                playerItems
+            };
+            localStorage.setItem('dungeonPop', JSON.stringify(data));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('dungeonPop');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    exp = data.exp || 0;
+                    expPerClick = data.expPerClick || 1;
+                    expPerSecond = data.expPerSecond || 0;
+                    steps = data.steps || 0;
+                    depth = data.depth || 0;
+                    currentFloor = data.currentFloor || 1;
+                    playerLevel = data.playerLevel || 1;
+                    playerExp = data.playerExp || 0;
+                    expToNextLevel = data.expToNextLevel || 100;
+                    playerMapX = data.playerMapX || 10;
+                    playerMapY = data.playerMapY || 180;
+                    playerItems = data.playerItems || {};
+                    if (data.upgrades) {
+                        data.upgrades.forEach(saved => {
+                            const upgrade = upgrades.find(u => u.id === saved.id);
+                            if (upgrade) upgrade.count = saved.count;
+                        });
+                    }
+                } catch (e) {
+                    console.error('ロード失敗', e);
+                }
+            }
+        }
+
+        function init() {
+            initDungeonMap();
+            populateDungeon();
+            loadGame();
+            updateDisplay();
+            updateDungeonInfo();
+            drawDungeon();
+            setInterval(autoGenerate, 1000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
